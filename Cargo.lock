@@ -1,6 +1,6 @@
 [root]
-name = "monitor_rs"
-version = "0.0.1"
+name = "monitor"
+version = "0.0.2"
 dependencies = [
  "time 0.1.32 (registry+https://github.com/rust-lang/crates.io-index)",
 ]

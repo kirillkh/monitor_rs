@@ -29,13 +29,13 @@ mod tests {
             let mon = mon.clone();
             let _ = thread::spawn(move || {
                 thread::sleep(duration_conv(sleep_time));
-                mon.with_lock(&|done: MonitorGuard<bool>| {
+                mon.with_lock(|done: MonitorGuard<bool>| {
                     f_done_sleeping(done);
                 });
             });
         }
         
-        mon.with_lock(&|mut done| {
+        mon.with_lock(|mut done| {
             let mut curr_time = time::get_time();
             let end_time = curr_time + wait_time;
             
@@ -67,7 +67,7 @@ mod tests {
             let mon = mon.clone();
             let _ = thread::spawn(move || {
                 thread::sleep(duration_conv(sleep_time));
-                mon.with_lock(&|done: MonitorGuard<u32>| {
+                mon.with_lock(|done: MonitorGuard<u32>| {
                     f_done_sleeping(done);
                 });
             });
@@ -82,7 +82,7 @@ mod tests {
         
         
         let waiter = |thread_id, wait_time, closure: Arc<Closure<FDW, FTW>>| {
-            Box::new(move |mut done: MonitorGuard<u32>| {
+            move |mut done: MonitorGuard<u32>| {
                 let mut curr_time = time::get_time();
                 let end_time = curr_time + wait_time;
                 
@@ -97,14 +97,14 @@ mod tests {
                 } else {
                     (closure.f_timeout_waiting)(thread_id);
                 }
-            })
+            }
         };
         
         let threads : Vec<_> = wait_times.into_iter().enumerate().map(|(i,t)| {
             let mon = mon.clone();
             let waiter = waiter(i as u32, t.clone(), closure.clone());
             thread::Builder::new().name(format!("{}", t)).spawn(move || {
-                mon.with_lock(&*waiter);
+                mon.with_lock(waiter);
             }).unwrap()
         }).collect();
         
@@ -124,14 +124,14 @@ mod tests {
             let mon = mon.clone();
             let _ = thread::spawn(move || {
                 thread::sleep_ms(500);
-                mon.with_lock(&|mut done| {
+                mon.with_lock(|mut done| {
                     *done = true;
                     done.notify_one();
                 });
             });
         }
         
-        mon.with_lock(&|mut done| {
+        mon.with_lock(|mut done| {
             let timeout = 1000;
             let mut curr_time = time::get_time();
             let end_time = curr_time + Duration::milliseconds(timeout);

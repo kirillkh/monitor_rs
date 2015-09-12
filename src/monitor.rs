@@ -17,7 +17,8 @@ impl<T: Sized> Monitor<T> {
         Monitor { mutex: Mutex::new(val), cvar: Condvar::new() }
     }
     
-    pub fn with_lock<U> (&self, f: &Fn(MonitorGuard<T>) -> U) -> U 
+    pub fn with_lock<U, F> (&self, f: F) -> U
+    where F: FnOnce(MonitorGuard<T>) -> U 
     {
         let g = self.mutex.lock().unwrap();
         f(MonitorGuard::new(&self.cvar, g))

@@ -33,14 +33,14 @@ fn main() {
         let mon = mon.clone();
         let _ = thread::spawn(move || {
             thread::sleep(Duration::new(1, 0));
-            mon.with_lock(&|done: MonitorGuard<bool>| {
+            mon.with_lock(|done: MonitorGuard<bool>| {
                 *done = true;
                 done.notify_one();
             });
         });
     }
     
-    mon.with_lock(&|mut done| {
+    mon.with_lock(|mut done| {
         while !*done {
             done.wait();
         }
