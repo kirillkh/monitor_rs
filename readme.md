@@ -3,9 +3,24 @@ A Rust library that implements the [Monitor synchronization construct](https://e
 
 License: [MIT](https://github.com/kirillkh/monitor_rs/blob/master/legal/mit.md)
 
+### Usage
+Put this in your `Cargo.toml`:
+
+```toml
+[dependencies]
+monitor = "0.0.1"
+```
+
+And this in your crate root:
+```rust
+extern crate monitor;
+use monitor::{Monitor, MonitorGuard};
+```
+
+
 ### Example
 ```rust
-extern crate monitor_rs;
+extern crate monitor;
 
 use monitor::{Monitor, MonitorGuard};
 use std::sync::Arc;
