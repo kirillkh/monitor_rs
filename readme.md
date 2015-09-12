@@ -8,7 +8,7 @@ Put this in your `Cargo.toml`:
 
 ```toml
 [dependencies]
-monitor = "0.0.1"
+monitor = "*"
 ```
 
 And this in your crate root:

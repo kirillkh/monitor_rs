@@ -1,7 +1,7 @@
 [package]
 name = "monitor"
 description = "Monitor synchronization construct"
-version = "0.0.1"
+version = "0.0.2"
 authors = [ "Kirill Khazan <kirillkh@gmail.com>" ]
 
 homepage = "https://github.com/kirillkh/monitor_rs"
