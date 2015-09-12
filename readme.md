@@ -20,21 +20,19 @@ use monitor::{Monitor, MonitorGuard};
 
 ### Example
 ```rust
-#![feature(thread_sleep)]
 extern crate monitor;
 
-use monitor::{Monitor, MonitorGuard};
+use monitor::Monitor;
 use std::sync::Arc;
 use std::thread;
-use std::time::Duration;
 
 fn main() {
     let mon = Arc::new(Monitor::new(false));
     {
         let mon = mon.clone();
         let _ = thread::spawn(move || {
-            thread::sleep(Duration::new(1, 0));
-            mon.with_lock(|mut done| {     // done is a MonitorGuard<bool>
+            thread::sleep_ms(1000);
+            mon.with_lock(|mut done| {     // done is a monitor::MonitorGuard<bool>
                 *done = true;
                 done.notify_one();
             });
