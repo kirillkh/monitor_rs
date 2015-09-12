@@ -1,14 +1,16 @@
 #![feature(wait_timeout)]
 #![cfg_attr(test, feature(thread_sleep))]
 
+pub use self::monitor::Monitor as Monitor;
+pub use self::monitor::MonitorGuard as MonitorGuard;
+
 mod monitor;
 
 #[cfg(test)]
 mod tests {
     use std::sync::{Arc, Mutex};
     use std::thread;
-    use monitor::Monitor;
-    use monitor::MonitorGuard;
+    use {Monitor, MonitorGuard};
      
     extern crate time;
     use self::time::Duration;

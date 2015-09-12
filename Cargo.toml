@@ -12,5 +12,5 @@ license-file = "legal/mit.md"
 
 keywords = [ "monitor", "synchronization" ]
 
-[dependencies]
+[dev-dependencies]
 time = "0.1.32"
