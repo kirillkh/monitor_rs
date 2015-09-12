@@ -1,5 +1,5 @@
 ## monitor_rs
-A Rust library that implements the [Monitor synchronization construct](https://en.wikipedia.org/wiki/Monitor_%28synchronization%29).
+A convenience library that provides an easier way to use the combination of Mutex+Condvar in Rust. The concept is known as [Monitor synchronization construct](https://en.wikipedia.org/wiki/Monitor_%28synchronization%29) and is similar to Java's synchronized() statement.
 
 License: [MIT](https://github.com/kirillkh/monitor_rs/blob/master/legal/mit.md)
 
