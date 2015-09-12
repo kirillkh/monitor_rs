@@ -1,0 +1,16 @@
+[package]
+name = "monitor_rs"
+description = "Monitor synchronization construct"
+version = "0.0.1"
+authors = [ "Kirill Khazan <kirillkh@gmail.com>" ]
+
+homepage = "https://github.com/kirillkh/monitor_rs"
+repository = "https://github.com/kirillkh/monitor_rs"
+
+readme = "readme.md"
+license-file = "legal/mit.md"
+
+keywords = [ "monitor", "synchronization" ]
+
+[dependencies]
+time = "0.1.32"
