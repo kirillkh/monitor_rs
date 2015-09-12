@@ -31,6 +31,7 @@ fn main() {
         let mon = mon.clone();
         let _ = thread::spawn(move || {
             thread::sleep_ms(1000);
+            
             mon.with_lock(|mut done| {     // done is a monitor::MonitorGuard<bool>
                 *done = true;
                 done.notify_one();
