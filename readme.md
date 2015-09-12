@@ -20,6 +20,7 @@ use monitor::{Monitor, MonitorGuard};
 
 ### Example
 ```rust
+#![feature(thread_sleep)]
 extern crate monitor;
 
 use monitor::{Monitor, MonitorGuard};
@@ -33,7 +34,7 @@ fn main() {
         let mon = mon.clone();
         let _ = thread::spawn(move || {
             thread::sleep(Duration::new(1, 0));
-            mon.with_lock(|done: MonitorGuard<bool>| {
+            mon.with_lock(|mut done| {     // done is a MonitorGuard<bool>
                 *done = true;
                 done.notify_one();
             });
@@ -44,6 +45,7 @@ fn main() {
         while !*done {
             done.wait();
         }
+        println!("finished waiting");
     });
 }
 ```
