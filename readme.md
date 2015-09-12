@@ -7,7 +7,7 @@ License: [MIT](https://github.com/kirillkh/monitor_rs/blob/master/legal/mit.md)
 ```rust
 extern crate monitor_rs;
 
-use monitor_rs::{Monitor, MonitorGuard};
+use monitor::{Monitor, MonitorGuard};
 use std::sync::Arc;
 use std::thread;
 use std::time::Duration;

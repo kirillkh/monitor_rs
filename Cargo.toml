@@ -1,5 +1,5 @@
 [package]
-name = "monitor_rs"
+name = "monitor"
 description = "Monitor synchronization construct"
 version = "0.0.1"
 authors = [ "Kirill Khazan <kirillkh@gmail.com>" ]
