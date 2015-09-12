@@ -14,7 +14,6 @@ monitor = "*"
 And this in your crate root:
 ```rust
 extern crate monitor;
-use monitor::{Monitor, MonitorGuard};
 ```
 
 
