@@ -33,9 +33,7 @@ mod tests {
         mon.with_lock(|mut done| {
             let start = Instant::now();
             let mut now = start;
-//            let end_time = curr_time + wait_time;
             
-//            while !*done && curr_time < end_time {
             while !*done && now-start < wait_time {
                 done.wait_timeout(start+wait_time-now);
                 now = Instant::now();
