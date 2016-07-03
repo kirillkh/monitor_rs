@@ -8,7 +8,7 @@ Put this in your `Cargo.toml`:
 
 ```toml
 [dependencies]
-monitor = "*"
+monitor = "0.1.0"
 ```
 
 And this in your crate root:
@@ -21,16 +21,17 @@ extern crate monitor;
 ```rust
 extern crate monitor;
 
-use monitor::Monitor;
+use std::time::Duration;
 use std::sync::Arc;
 use std::thread;
+use monitor::Monitor;
 
 fn main() {
     let mon = Arc::new(Monitor::new(false));
     {
         let mon = mon.clone();
         let _ = thread::spawn(move || {
-            thread::sleep_ms(1000);
+            thread::sleep(Duration::from_millis(1000));
             
             mon.with_lock(|mut done| {     // done is a monitor::MonitorGuard<bool>
                 *done = true;

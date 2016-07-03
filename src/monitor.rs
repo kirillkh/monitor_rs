@@ -43,8 +43,8 @@ impl<'a, T: 'a> MonitorGuard<'a, T> {
     }
     
     pub fn wait_timeout(&mut self, t: Duration) -> WaitTimeoutResult {
-        let (g, finished) = self.cvar.wait_timeout(self.guard.take().unwrap(), t).unwrap();
-        self.guard = Some(g);
+		let (g, finished) = self.cvar.wait_timeout(self.guard.take().unwrap(), t).unwrap();
+        self.guard = Some(g);    	
         finished
     }
     

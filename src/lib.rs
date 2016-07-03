@@ -1,6 +1,3 @@
-#![feature(wait_timeout)]
-#![cfg_attr(test, feature(thread_sleep))]
-
 pub use self::monitor::Monitor as Monitor;
 pub use self::monitor::MonitorGuard as MonitorGuard;
 
@@ -12,9 +9,7 @@ mod tests {
     use std::thread;
     use {Monitor, MonitorGuard};
      
-    extern crate time;
-    use self::time::Duration;
-    use std::time::Duration as StdDur;
+    use std::time::{Duration, Instant};
  
     fn template_one_waiter<FDS, FDW, FTW> (sleep_time: Duration, wait_time: Duration,
                                            f_done_sleeping: FDS,
@@ -28,7 +23,7 @@ mod tests {
         {
             let mon = mon.clone();
             let _ = thread::spawn(move || {
-                thread::sleep(duration_conv(sleep_time));
+                thread::sleep(sleep_time);
                 mon.with_lock(|done: MonitorGuard<bool>| {
                     f_done_sleeping(done);
                 });
@@ -36,12 +31,14 @@ mod tests {
         }
         
         mon.with_lock(|mut done| {
-            let mut curr_time = time::get_time();
-            let end_time = curr_time + wait_time;
+            let start = Instant::now();
+            let mut now = start;
+//            let end_time = curr_time + wait_time;
             
-            while !*done && curr_time < end_time {
-                done.wait_timeout(duration_conv(end_time - curr_time));
-                curr_time = time::get_time();
+//            while !*done && curr_time < end_time {
+            while !*done && now-start < wait_time {
+                done.wait_timeout(start+wait_time-now);
+                now = Instant::now();
             }
             
             if *done {
@@ -66,7 +63,7 @@ mod tests {
         {
             let mon = mon.clone();
             let _ = thread::spawn(move || {
-                thread::sleep(duration_conv(sleep_time));
+                thread::sleep(sleep_time);
                 mon.with_lock(|done: MonitorGuard<u32>| {
                     f_done_sleeping(done);
                 });
@@ -83,12 +80,11 @@ mod tests {
         
         let waiter = |thread_id, wait_time, closure: Arc<Closure<FDW, FTW>>| {
             move |mut done: MonitorGuard<u32>| {
-                let mut curr_time = time::get_time();
-                let end_time = curr_time + wait_time;
-                
-                while *done == 0 && curr_time < end_time {
-                    done.wait_timeout(duration_conv(end_time - curr_time));
-                    curr_time = time::get_time();
+                let start = Instant::now();
+                let mut now = start;
+                while *done == 0 && now-start < wait_time {
+                    done.wait_timeout(start+wait_time-now);
+                    now = Instant::now();
                 }
                 
                 if *done > 0 {
@@ -103,7 +99,7 @@ mod tests {
         let threads : Vec<_> = wait_times.into_iter().enumerate().map(|(i,t)| {
             let mon = mon.clone();
             let waiter = waiter(i as u32, t.clone(), closure.clone());
-            thread::Builder::new().name(format!("{}", t)).spawn(move || {
+            thread::Builder::new().name(format!("{:?}", t)).spawn(move || {
                 mon.with_lock(waiter);
             }).unwrap()
         }).collect();
@@ -123,7 +119,7 @@ mod tests {
         {
             let mon = mon.clone();
             let _ = thread::spawn(move || {
-                thread::sleep_ms(500);
+                thread::sleep(Duration::from_millis(500));
                 mon.with_lock(|mut done| {
                     *done = true;
                     done.notify_one();
@@ -132,24 +128,24 @@ mod tests {
         }
         
         mon.with_lock(|mut done| {
-            let timeout = 1000;
-            let mut curr_time = time::get_time();
-            let end_time = curr_time + Duration::milliseconds(timeout);
+            let timeout = Duration::from_millis(1000);
+            let start = Instant::now();
+            let mut now = start;
             
             while !*done {
-                if curr_time >= end_time {
+                if now >= start+timeout {
                     panic!("timeout reached");
                 }
-                done.wait_timeout(duration_conv(end_time - curr_time));
-                curr_time = time::get_time();
+                done.wait_timeout(start+timeout-now);
+                now = Instant::now();
             }
         });
     }
     
     
     
-    fn d50() -> Duration { Duration::milliseconds(50) }
-    fn d100() -> Duration { Duration::milliseconds(100) }
+    fn d50() -> Duration { Duration::from_millis(50) }
+    fn d100() -> Duration { Duration::from_millis(100) }
     
     
     #[test]
@@ -190,7 +186,7 @@ mod tests {
                  |mut done| {
                     *done = true;
                     done.notify_one();
-                    thread::sleep(StdDur::from_millis(100))
+                    thread::sleep(Duration::from_millis(100))
                  },
                  
                  || {},
@@ -200,7 +196,7 @@ mod tests {
         template_one_waiter(d50().clone(), d100().clone(),
                  |mut done| {
                     done.notify_one();
-                    thread::sleep(StdDur::from_millis(100));
+                    thread::sleep(Duration::from_millis(100));
                     *done = true;
                  },
                  
@@ -275,7 +271,7 @@ mod tests {
                  |mut done| {
                     *done = 1;
                     done.notify_all();
-                    thread::sleep(StdDur::from_millis(100))
+                    thread::sleep(Duration::from_millis(100))
                  },
                  
                  |_| {},
@@ -285,7 +281,7 @@ mod tests {
         template_n_waiters(d50().clone(), &[d100().clone()],
                  |mut done| {
                     done.notify_all();
-                    thread::sleep(StdDur::from_millis(100));
+                    thread::sleep(Duration::from_millis(100));
                     *done = 1;
                  },
                  
@@ -296,7 +292,7 @@ mod tests {
         template_n_waiters(d50().clone(), &[d100().clone()],
                  |mut done| {
                     done.notify_all();
-                    thread::sleep(StdDur::from_millis(100));
+                    thread::sleep(Duration::from_millis(100));
                     *done = 1;
                  },
                  
@@ -322,7 +318,7 @@ mod tests {
                  |mut done| {
                     *done = 2;
                     done.notify_all();
-                    thread::sleep(StdDur::from_millis(100))
+                    thread::sleep(Duration::from_millis(100))
                  },
                  
                  |_| {},
@@ -332,7 +328,7 @@ mod tests {
         template_n_waiters(d50().clone(), &[d100().clone(), d100().clone()],
                  |mut done| {
                     done.notify_all();
-                    thread::sleep(StdDur::from_millis(100));
+                    thread::sleep(Duration::from_millis(100));
                     *done = 2;
                  },
                  
@@ -343,18 +339,12 @@ mod tests {
         template_n_waiters(d50().clone(), &[d100().clone(), d100().clone()],
                  |mut done| {
                     done.notify_all();
-                    thread::sleep(StdDur::from_millis(100));
+                    thread::sleep(Duration::from_millis(100));
                     *done = 2;
                  },
                  
                  |_| {},
                  |tid| panic!("thread {} should not time out", tid)
         );
-    }
-    
-    
-    fn duration_conv(d: Duration) -> StdDur {
-        let seconds = d.num_seconds();
-        StdDur::new(seconds as u64, (d - Duration::seconds(seconds)).num_nanoseconds().unwrap()  as u32)
     }
 }
